@@ -2,9 +2,13 @@
 use MapasCulturais\i;
 
 $app = MapasCulturais\App::i();
+
+$slo_slug = $slo_instance->config['slug'];
 $slug = $plugin->getSlug();
 $name = $plugin->getName();
-$route = MapasCulturais\App::i()->createUrl($slug, "export");
+
+$route = MapasCulturais\App::i()->createUrl($slug, "export", ['opportunity' => $opportunity, 'slo_slug' => $slo_slug]);
+
 ?>
 <a class="btn btn-default download btn-export-cancel"  ng-click="editbox.open('<?= $slug ?>-export', $event)" rel="noopener noreferrer">CSV <?= $name ?></a>
 <!-- Formulário -->
