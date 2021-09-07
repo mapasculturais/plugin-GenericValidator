@@ -18,11 +18,11 @@ $template = '
 </li>';
 ?>
 <div class="widget">
-    <h3 class="editando"><?= sprintf(\MapasCulturais\i::__("Arquivos do %s"), $name) ?></h3>
+    <h3 class="editando"><?= sprintf(i::__("Arquivos do %s"), $name) ?></h3>
     <div>
-        <a class="add js-open-editbox hltip" data-target="#editbox-<?= $slug ?>-file" href="#" title="<?= sprintf(\MapasCulturais\i::__("Clique para adicionar subir novo arquivo de validação do %s"), $name) ?>"> <?= i::__("subir arquivo") ?></a>
+        <a class="add js-open-editbox hltip" data-target="#editbox-<?= $slug ?>-file" href="#" title="<?= sprintf(i::__("Clique para adicionar subir novo arquivo de validação do %s"), $name) ?>"> <?= i::__("subir arquivo") ?></a>
     </div>
-    <div id="editbox-<?= $slug ?>-file" class="js-editbox mc-left" title="<?= sprintf(\MapasCulturais\i::__("Subir arquivo de validação do %s"), $name) ?>" data-submit-label="<?= i::__("Enviar") ?>">
+    <div id="editbox-<?= $slug ?>-file" class="js-editbox mc-left" title="<?= sprintf(i::__("Subir arquivo de validação do %s"), $name) ?>" data-submit-label="<?= i::__("Enviar") ?>">
         <?php $this->ajaxUploader($entity, $slug, "append", "ul.js-validador", $template, "", false, false, false); ?>
     </div>
     <ul class="widget-list js-validador js-slimScroll">
@@ -30,7 +30,7 @@ $template = '
             <li id="file-<?= $file->id ?>" class="widget-list-item<?php if ($this->isEditable()) echo i::__(" is-editable"); ?>" >
                 <a href="<?= $file->url ?>"><span><?= $file->description ? $file->description : $file->name ?></span></a>
                 <?php if ($processed_at = $entity->{$slug . '_processed_files'}->{$file->name} ?? null): ?>
-                    - <?= sprintf(\MapasCulturais\i::__("processado em %s"), $processed_at) ?>
+                    - <?= sprintf(i::__("processado em %s"), $processed_at) ?>
                 <?php else: ?>
                 <div class="botoes">
                     <a href="<?=$url?>?file=<?=$file->id?>" class="btn btn-primary hltip js-validador-process" data-hltip-classes="hltip-ajuda" title="<?= i::__("Clique para processar o arquivo enviado") ?>">
