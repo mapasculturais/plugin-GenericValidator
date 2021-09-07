@@ -5,11 +5,16 @@ namespace GenericValidator;
 use MapasCulturais\i;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Registration;
+use StreamlinedOpportunity\Plugin as StreamlinedOpportunity;
 
 class Plugin extends \AbstractValidator\AbstractValidator
 {
+    protected static $instance = null;
+    
     function __construct(array $config=[])
     {
+        self::$instance =  $this;
+
         $config += [
             // slug utilizado como id do controller
             "slug" => "generic-validator",
@@ -102,9 +107,15 @@ class Plugin extends \AbstractValidator\AbstractValidator
         $definition = new \MapasCulturais\Definitions\FileGroup($slug, ["^text/csv$"], i::__("O arquivo enviado não é um csv."), false, null, true);
         $app->registerFileGroup("opportunity", $definition);
         parent::register();
-        $app->controller($slug)->plugin = $this;
+        // $app->controller($slug)->plugin = $this;
         return;
     }
+
+    public static function getInstance()
+    {
+        return  self::$instance;
+    }
+
 
     function getName(): string
     {
