@@ -12,7 +12,6 @@ use MapasCulturais\Entities\Opportunity;
 use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationEvaluation;
 use MapasCulturais\i;
-use GenericValidator\Plugin as GenericValidator;
 
 /**
  * Generic Validator Controller
@@ -30,9 +29,9 @@ class Controller extends \MapasCulturais\Controllers\Registration
     /**
      * Retorna uma instância do controller
      * @param string $controller_id 
-     * @return StreamlinedOpportunity 
+     * @return GenericValidator 
      */
-    static public function i(string $controller_id): Controller {
+    static public function i(string $controller_id): \MapasCulturais\Controller {
         $instance = parent::i($controller_id);
         $instance->init($controller_id);
 
