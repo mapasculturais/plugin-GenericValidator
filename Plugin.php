@@ -13,8 +13,6 @@ class Plugin extends \AbstractValidator\AbstractValidator
     
     function __construct(array $config=[])
     {
-        self::$instance =  $this;
-
         $config += [
             // slug utilizado como id do controller
             "slug" => "generic-validator",
@@ -39,6 +37,9 @@ class Plugin extends \AbstractValidator\AbstractValidator
         ];
         $this->_config = $config;
         parent::__construct($config);
+
+        self::$instance[$config['slug']] =  $this;
+
         return;
     }
 
@@ -123,9 +124,9 @@ class Plugin extends \AbstractValidator\AbstractValidator
         return;
     }
 
-    public static function getInstance()
+    public static function getInstanceBySlug(string $slug)
     {
-        return  self::$instance;
+        return  self::$instance[$slug] ?? null;
     }
 
     public function prefix(string $value): string

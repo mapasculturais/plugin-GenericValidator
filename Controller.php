@@ -24,16 +24,30 @@ use GenericValidator\Plugin as GenericValidator;
 class Controller extends \MapasCulturais\Controllers\Registration
 {
     protected $config = [];
-    protected $instanceConfig = [];
     protected $plugin;
 
-    public function setPlugin(Plugin $plugin)
-    {
-        $this->plugin = $plugin;
-        $app = App::i();
-        $this->config = $app->plugins[$plugin->config["related_plugin_key"]]->config;
-        $this->config += $this->plugin->config;
-        return;
+    protected $_initiated = false;
+
+
+    /**
+     * Retorna uma instância do controller
+     * @param string $controller_id 
+     * @return StreamlinedOpportunity 
+     */
+    static public function i(string $controller_id): Controller {
+        $instance = parent::i($controller_id);
+        $instance->init($controller_id);
+
+        return $instance;
+    }
+
+    protected function init($controller_id) {
+        if (!$this->_initiated) {
+            $this->plugin = Plugin::getInstanceBySlug($controller_id);
+            $this->config = $this->plugin->config;
+
+            $this->_initiated = true;
+        }
     }
 
     protected function exportInit(Opportunity $opportunity)
@@ -59,7 +73,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
     {
         $app = App::i();
 
-        $plugin = GenericValidator::getInstance();
+        $plugin = $this->plugin;
 
         // registration status
         $status = intval($this->data["status"] ?? 1);
@@ -105,7 +119,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
         // exclude registrations that have not been homologated, or were previously validated, or are missing requirements
         $registrations = [];
         $repo = $app->repo("RegistrationEvaluation");
-        $validator_user = $plugin->getUser();
+        $validator_user = $plugin->user;
         foreach ($result as $registration) {
             $evaluations = $repo->findBy([
                 "registration" => $registration,
@@ -124,7 +138,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
             }
              // homologated registrations (depending on configuration)
              /** @todo: handle other evaluation methods */
-            if ($plugin->config["homologation_required_for_export"]) {
+            if ($this->config["homologation_required_for_export"]) {
                 $homologated = false;
                 // find a "selected" evaluation (result "10"), but keep an eye out for "non-selected" evaluations, these take priority
                 foreach ($evaluations as $evaluation) {
@@ -147,7 +161,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
             }
             // registrations meeting the configured validation requirements
             /** @todo: handle other evaluation methods */
-            foreach ($plugin->config["required_validations_for_export"] as $slug) {
+            foreach ($this->config["required_validations_for_export"] as $slug) {
                 $validated = false;
                 foreach ($evaluations as $evaluation) {
                     if (($evaluation->user->validator_for == $slug) && ($evaluation->result == "10")) {
@@ -164,7 +178,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
                 $registrations[] = $registration;
             }
         }
-        $app->applyHookBoundTo($this, "validator({$plugin->getSlug()}).registrations", [&$registrations, $opportunity]);
+        $app->applyHookBoundTo($this, "validator({$plugin->slug}).registrations", [&$registrations, $opportunity]);
         return $registrations;
     }
 
@@ -196,8 +210,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
             }
         }
         
-        $plugin = GenericValidator::getInstance();
-        $slug = $plugin->slug;
+        $slug = $this->plugin->slug;
         $hash = md5(json_encode($csv_data));
         $dir = PRIVATE_FILES_PATH . $this->data['slo_slug'] . '/';
         $filename =  $dir . "{$slug}-{$prefix}-{$hash}.csv";
@@ -226,8 +239,6 @@ class Controller extends \MapasCulturais\Controllers\Registration
     {
         $app = App::i();
 
-        $plugin = GenericValidator::getInstance();
-
         $opportunity_id = $this->data['opportunity'];
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         
@@ -239,7 +250,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
             echo "No registrations found.";
             die();
         }
-        $fields = $plugin->config["export_fields"];
+        $fields = $this->config["export_fields"];
         $filename = $this->generateCSV("op{$opportunity->id}-registrations", $registrations, $fields);
         header("Content-Type: application/csv");
         header("Content-Disposition: attachment; filename=" . basename($filename));
@@ -252,8 +263,6 @@ class Controller extends \MapasCulturais\Controllers\Registration
     {
         $this->requireAuthentication();
 
-        $plugin = GenericValidator::getInstance();
-        
         $app = App::i();
         $opportunity_id = $this->data["opportunity"] ?? 0;
         $file_id = $this->data["file"] ?? 0;
@@ -264,7 +273,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
         }
         
         $opportunity->checkPermission("@control");
-        $files = $opportunity->getFiles($plugin->getSlug());
+        $files = $opportunity->getFiles($this->plugin->slug);
         foreach ($files as $file) {
             if ($file->id == $file_id) {
                 $this->import($opportunity, $file->getPath());
@@ -295,7 +304,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
         }
         $app = App::i();
 
-        $plugin = GenericValidator::getInstance();
+        $plugin = $this->plugin;
 
         // setup CSV reader
         $stream = fopen($filename, "r");
@@ -381,7 +390,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
         $app->enableAccessControl();
         // the entity must be fetched again for writing due to $app->em->clear()
         $opportunity = $app->repo("Opportunity")->find($opportunity->id);
-        $slug = $plugin->getSlug();
+        $slug = $plugin->slug;
         $opportunity->refresh();
         $opportunity->name = $opportunity->name . " ";
         $files = $opportunity->{$slug . "_processed_files"};
