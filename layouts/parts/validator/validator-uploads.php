@@ -23,9 +23,9 @@ $template = '
         <a class="add js-open-editbox hltip" data-target="#editbox-<?= $slug ?>-file" href="#" title="<?= sprintf(i::__("Clique para adicionar subir novo arquivo de validação do %s"), $name) ?>"> <?= i::__("subir arquivo") ?></a>
     </div>
     <div id="editbox-<?= $slug ?>-file" class="js-editbox mc-left" title="<?= sprintf(i::__("Subir arquivo de validação do %s"), $name) ?>" data-submit-label="<?= i::__("Enviar") ?>">
-        <?php $this->ajaxUploader($entity, $slug, "append", "ul.js-validador", $template, "", false, false, false); ?>
+        <?php $this->ajaxUploader($entity, $slug, "append", "ul.js-validador.{$slug}", $template, "", false, false, false); ?>
     </div>
-    <ul class="widget-list js-validador js-slimScroll">
+    <ul class="widget-list js-validador js-slimScroll <?=$slug?>">
         <?php if (is_array($files)): foreach( $files as $file): ?>
             <li id="file-<?= $file->id ?>" class="widget-list-item<?php if ($this->isEditable()) echo i::__(" is-editable"); ?>" >
                 <a href="<?= $file->url ?>"><span><?= $file->description ? $file->description : $file->name ?></span></a>
