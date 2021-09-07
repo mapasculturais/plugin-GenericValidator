@@ -33,7 +33,9 @@ class Plugin extends \AbstractValidator\AbstractValidator
             // lista de validadores requeridos na exportação
             "required_validations_for_export" => [],
             // campos do exportador
-            "export_fields" => [i::__("ID do Agente") => "agent_id"],
+            "export_fields" => [i::__("DOCUMENTO") => function($registration){
+                return $registration->owner->documento;
+            }],
         ];
         $this->_config = $config;
         parent::__construct($config);
@@ -43,35 +45,44 @@ class Plugin extends \AbstractValidator\AbstractValidator
     function _init()
     {
         $app = App::i();
-        $plugin_slo = $app->plugins[$this->config["slo_id"]];
         $plugin = $this;
-        $opportunity_id = $plugin_slo->managedOpportunity;
+
         //botao de export csv
-        $app->hook("template(opportunity.single.header-inscritos):end", function () use ($plugin_slo, $plugin, $app, $opportunity_id) {
+        $app->hook("template(opportunity.single.header-inscritos):end", function () use ($plugin, $app) {
             /** @var \MapasCulturais\Theme $this */
-            $requestedOpportunity = $this->controller->requestedEntity;
-            if (($requestedOpportunity->id == $opportunity_id) && $requestedOpportunity->canUser("@control")) {
+            
+            $opportunity = $this->controller->requestedEntity;
+            $is_opportunity_managed_handler = $plugin->config['is_opportunity_managed_handler']($opportunity);
+            
+            if($is_opportunity_managed_handler && $opportunity->canUser('@control')) {
+
+                $slo_instance = StreamlinedOpportunity::getInstanceByOpportunityId($opportunity->id);
+
                 $app->view->enqueueScript("app", "streamlinedopportunity", "streamlinedopportunity/app.js");
                 $this->part("validator/csv-button", [
-                    "opportunity" => $opportunity_id,
-                    "plugin_slo" => $plugin_slo,
+                    "opportunity" => $opportunity->id,
+                    "slo_instance" => $slo_instance,
                     "plugin" => $plugin
                 ]);
             }
-            return;
         });
+
         // uploads de CSVs
-        $app->hook("template(opportunity.<<single|edit>>.sidebar-right):end", function () use ($plugin_slo, $plugin, $opportunity_id) {
+        $app->hook("template(opportunity.<<single|edit>>.sidebar-right):end", function () use ($plugin) {
             /** @var \MapasCulturais\Theme $this */
             $opportunity = $this->controller->requestedEntity;
-            if (($opportunity->id == $opportunity_id) && $opportunity->canUser("@control")) {
+            $is_opportunity_managed_handler = $plugin->config['is_opportunity_managed_handler']($opportunity);
+            
+            if($is_opportunity_managed_handler && $opportunity->canUser('@control')) {
+
+                $slo_instance = StreamlinedOpportunity::getInstanceByOpportunityId($opportunity->id);
+
                 $this->part("validator/validator-uploads", [
                     "entity" => $opportunity,
-                    "plugin_slo" => $plugin_slo,
+                    "plugin_slo" => $slo_instance,
                     "plugin" => $plugin
                 ]);
             }
-            return;
         });
         parent::_init();
         return;
