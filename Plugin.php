@@ -91,30 +91,31 @@ class Plugin extends \AbstractValidator\AbstractValidator
     function register()
     {
         $app = App::i();
-        $slug = $this->getSlug();
-        $this->registerOpportunityMetadata($slug . "_processed_files", [
+        $this->registerOpportunityMetadata($this->prefix("processed_files"), [
             "label" => "Arquivos do validador processados",
             "type" => "json",
             "private" => true,
             "default_value" => "{}"
         ]);
-        $this->registerRegistrationMetadata($slug . "_filename", [
+        $this->registerRegistrationMetadata($this->prefix("filename"), [
             "label" => "Nome do arquivo do validador",
             "type" => "string",
             "private" => true,
         ]);
-        $this->registerRegistrationMetadata($slug . "_raw", [
+        $this->registerRegistrationMetadata($this->prefix("raw"), [
             "label" => "Dados não processados do validador (linha do csv)",
             "type" => "json",
             "private" => true,
             "default_value" => "{}"
         ]);
-        $this->registerRegistrationMetadata($slug . "_processed", [
+        $this->registerRegistrationMetadata($this->prefix("processed"), [
             "label" => "Dados processados do validador",
             "type" => "json",
             "private" => true,
             "default_value" => "{}"
         ]);
+
+        $slug = $this->getSlug();
         $definition = new \MapasCulturais\Definitions\FileGroup($slug, ["^text/csv$"], i::__("O arquivo enviado não é um csv."), false, null, true);
         $app->registerFileGroup("opportunity", $definition);
         parent::register();
@@ -127,6 +128,10 @@ class Plugin extends \AbstractValidator\AbstractValidator
         return  self::$instance;
     }
 
+    public function prefix(string $value): string
+    {
+        return $this->getSlug()."_$value";
+    }
 
     function getName(): string
     {
