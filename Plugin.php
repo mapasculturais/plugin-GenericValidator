@@ -5,12 +5,11 @@ namespace GenericValidator;
 use MapasCulturais\i;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Registration;
-use StreamlinedOpportunity\Plugin as StreamlinedOpportunity;
 
 class Plugin extends \AbstractValidator\AbstractValidator
 {
     protected static $instance = null;
-    
+
     function __construct(array $config=[])
     {
         $config += [
@@ -37,9 +36,7 @@ class Plugin extends \AbstractValidator\AbstractValidator
         ];
         $this->_config = $config;
         parent::__construct($config);
-
-        self::$instance[$config['slug']] =  $this;
-
+        self::$instance[$config["slug"]] = $this;
         return;
     }
 
@@ -47,43 +44,32 @@ class Plugin extends \AbstractValidator\AbstractValidator
     {
         $app = App::i();
         $plugin = $this;
-
-        //botao de export csv
+        // botão de export de CSV
         $app->hook("template(opportunity.single.header-inscritos):end", function () use ($plugin, $app) {
             /** @var \MapasCulturais\Theme $this */
-            
             $opportunity = $this->controller->requestedEntity;
-            $is_opportunity_managed_handler = $plugin->config['is_opportunity_managed_handler']($opportunity);
-            
-            if($is_opportunity_managed_handler && $opportunity->canUser('@control')) {
-
-                $slo_instance = StreamlinedOpportunity::getInstanceByOpportunityId($opportunity->id);
-
+            $is_opportunity_managed = $plugin->config["is_opportunity_managed_handler"]($opportunity);
+            if ($is_opportunity_managed && $opportunity->canUser("@control")) {
                 $app->view->enqueueScript("app", "streamlinedopportunity", "streamlinedopportunity/app.js");
                 $this->part("validator/csv-button", [
                     "opportunity" => $opportunity->id,
-                    "slo_instance" => $slo_instance,
                     "plugin" => $plugin
                 ]);
             }
+            return;
         });
-
         // uploads de CSVs
         $app->hook("template(opportunity.<<single|edit>>.sidebar-right):end", function () use ($plugin) {
             /** @var \MapasCulturais\Theme $this */
             $opportunity = $this->controller->requestedEntity;
-            $is_opportunity_managed_handler = $plugin->config['is_opportunity_managed_handler']($opportunity);
-            
-            if($is_opportunity_managed_handler && $opportunity->canUser('@control')) {
-
-                $slo_instance = StreamlinedOpportunity::getInstanceByOpportunityId($opportunity->id);
-
+            $is_opportunity_managed = $plugin->config["is_opportunity_managed_handler"]($opportunity);
+            if ($is_opportunity_managed && $opportunity->canUser("@control")) {
                 $this->part("validator/validator-uploads", [
                     "entity" => $opportunity,
-                    "plugin_slo" => $slo_instance,
                     "plugin" => $plugin
                 ]);
             }
+            return;
         });
         parent::_init();
         return;
@@ -126,12 +112,12 @@ class Plugin extends \AbstractValidator\AbstractValidator
 
     public static function getInstanceBySlug(string $slug)
     {
-        return  self::$instance[$slug] ?? null;
+        return (self::$instance[$slug] ?? null);
     }
 
     public function prefix(string $value): string
     {
-        return $this->getSlug()."_$value";
+        return ($this->getSlug() . "_$value");
     }
 
     function getName(): string
@@ -142,11 +128,6 @@ class Plugin extends \AbstractValidator\AbstractValidator
     function getSlug(): string
     {
         return $this->_config["slug"];
-    }
-
-    function getStreamlinedPlugin(): \MapasCulturais\Plugin
-    {
-        return App::i()->plugins[$this->config["slo_id"]];
     }
 
     function getControllerClassname(): string
