@@ -209,7 +209,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
         
         $slug = $this->plugin->slug;
         $hash = md5(json_encode($csv_data));
-        $dir = PRIVATE_FILES_PATH . $this->data['slo_slug'] . '/';
+        $dir = PRIVATE_FILES_PATH . $slug . '/';
         $filename =  $dir . "{$slug}-{$prefix}-{$hash}.csv";
         if (!is_dir($dir)) {
             mkdir($dir, 0700, true);
