@@ -336,12 +336,19 @@ class Controller extends \MapasCulturais\Controllers\Registration
             switch (strtolower($eval)) {
                 case "selecionado":
                 case "selecionada":
+                case "valida":
+                case "valido":
+                case "válida":
+                case "válido":
+                case "sim":
                     $result = "10";
                     break;
                 case "invalido":
                 case "inválido":
                 case "invalida":
                 case "inválida":
+                case "não":
+                case "nao":
                     $result = "2";
                     break;
                 case "não selecionado":
