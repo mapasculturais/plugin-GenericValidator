@@ -31,9 +31,14 @@ class Plugin extends \AbstractValidator\AbstractValidator
             // lista de validadores requeridos na exportação
             "required_validations_for_export" => [],
             // campos do exportador
-            "export_fields" => [i::__("DOCUMENTO") => function($registration){
-                return $registration->owner->documento;
-            }],
+            "export_fields" => [
+                i::__("NOME") => function($registration){
+                    return $registration->owner->name;
+                },
+                i::__("CPF") => function($registration){
+                    return $registration->owner->documento;
+                },
+            ],
         ];
         $this->_config = $config;
         parent::__construct($config);
