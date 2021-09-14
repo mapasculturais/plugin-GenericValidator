@@ -35,7 +35,14 @@ class Plugin extends \AbstractValidator\AbstractValidator
                     return $registration->owner->name;
                 },
                 i::__("CPF") => function($registration){
-                    return $registration->owner->documento;
+
+                    $cpf = preg_replace('/[^0-9]/i', '', $registration->owner->documento);
+
+                    $docFormat = substr($cpf, 0, 3) . '.' .
+                                 substr($cpf, 3, 3) . '.' .
+                                 substr($cpf, 6, 3) . '-' .
+                                 substr($cpf, 9, 2);
+                    return $docFormat;
                 },
             ],
         ];
