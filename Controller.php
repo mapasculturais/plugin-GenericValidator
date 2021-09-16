@@ -333,7 +333,7 @@ class Controller extends \MapasCulturais\Controllers\Registration
             $obs = $line[$key_notes];
             $eval = $line[$key_eval];
             // @TODO: Are these subject to i18n?
-            switch (strtolower($eval)) {
+            switch (mb_strtolower($eval)) {
                 case "selecionado":
                 case "selecionada":
                 case "valida":
