@@ -32,11 +32,11 @@ class Plugin extends \AbstractValidator\AbstractValidator
             // campos do exportador
             "export_fields" => [
                 i::__("NOME") => function($registration){
-                    return $registration->owner->name;
+                    return $registration->field_3949;
                 },
                 i::__("CPF") => function($registration){
 
-                    $cpf = preg_replace('/[^0-9]/i', '', $registration->owner->documento);
+                    $cpf = preg_replace('/[^0-9]/i', '', $registration->field_3953);
 
                     $docFormat = substr($cpf, 0, 3) . '.' .
                                  substr($cpf, 3, 3) . '.' .
