@@ -363,7 +363,9 @@ class Controller extends \MapasCulturais\Controllers\Registration
                 default:
                     die("The value for column $key_eval at line $i is invalid. Allowed values are 'selecionada', 'invalida', 'nao selecionada', and 'suplente'.");
             }
-            $registration = $app->repo("Registration")->findOneBy(["number" => $num]);
+            if(!$registration = $app->repo("Registration")->findOneBy(["number" => $num])){
+                continue;
+            }
             $registration->__skipQueuingPCacheRecreation = true;
             /* @TODO: implementar atualização de status?? */
             if ($registration->{$slug . "_raw"} != (object) []) {
