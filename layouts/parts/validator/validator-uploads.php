@@ -20,7 +20,8 @@ $template = '
 <div class="widget">
     <h3 class="editando"><?= sprintf(i::__("Arquivos do %s"), $name) ?></h3>
     <div>
-        <a class="add js-open-editbox hltip" data-target="#editbox-<?= $slug ?>-file" href="#" title="<?= sprintf(i::__("Clique para adicionar subir novo arquivo de validação do %s"), $name) ?>"> <?= i::__("subir arquivo") ?></a>
+        <?php $this->part("validator/csv-button", ["opportunity" => $entity->id,"plugin" => $plugin]); ?>
+        <button class="btn btn-default add js-open-editbox hltip" data-target="#editbox-<?= $slug ?>-file" href="#" title="Clique para adicionar e subir novo arquivo de validação do <?=$name?>"><?= i::__("subir arquivo") ?></button>
     </div>
     <div id="editbox-<?= $slug ?>-file" class="js-editbox mc-left" title="<?= sprintf(i::__("Subir arquivo de validação do %s"), $name) ?>" data-submit-label="<?= i::__("Enviar") ?>">
         <?php $this->ajaxUploader($entity, $slug, "append", "ul.js-validador.{$slug}", $template, "", false, false, false); ?>

@@ -56,25 +56,15 @@ class Plugin extends \AbstractValidator\AbstractValidator
     {
         $app = App::i();
         $plugin = $this;
-        // botão de export de CSV
-        $app->hook("template(opportunity.single.header-inscritos):end", function () use ($plugin, $app) {
-            /** @var \MapasCulturais\Theme $this */
-            $opportunity = $this->controller->requestedEntity;
-            $is_opportunity_managed = $plugin->config["is_opportunity_managed_handler"]($opportunity);
-            if ($is_opportunity_managed && $opportunity->canUser("@control")) {
-                $app->view->enqueueScript("app", "streamlinedopportunity", "streamlinedopportunity/app.js");
-                $this->part("validator/csv-button", [
-                    "opportunity" => $opportunity->id,
-                    "plugin" => $plugin
-                ]);
-            }
-            return;
-        });
-        // uploads de CSVs
+       
+        // Botões de upload e download das planilhas
         $app->hook("template(opportunity.<<single|edit>>.sidebar-right):end", function () use ($plugin) {
+            
             /** @var \MapasCulturais\Theme $this */
             $opportunity = $this->controller->requestedEntity;
+            
             $is_opportunity_managed = $plugin->config["is_opportunity_managed_handler"]($opportunity);
+
             if ($is_opportunity_managed && $opportunity->canUser("@control")) {
                 $this->part("validator/validator-uploads", [
                     "entity" => $opportunity,
@@ -83,6 +73,7 @@ class Plugin extends \AbstractValidator\AbstractValidator
             }
             return;
         });
+        
         parent::_init();
         return;
     }
