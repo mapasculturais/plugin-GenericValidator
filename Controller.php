@@ -341,7 +341,9 @@ class Controller extends \MapasCulturais\Controllers\Registration
                 case "válida":
                 case "válido":
                 case "sim":
-                    $result = "10";
+                    $result = $plugin->config['result_selected'];
+                    $obs_padrao = $plugin->config['obs_selected'];
+                    $status = $plugin->config['status_selected'];
                     break;
                 case "invalido":
                 case "inválido":
@@ -349,13 +351,17 @@ class Controller extends \MapasCulturais\Controllers\Registration
                 case "inválida":
                 case "não":
                 case "nao":
-                    $result = "2";
+                    $result = $plugin->config['result_invalid'];
+                    $obs_padrao = $plugin->config['obs_invalid'];
+                    $status = $plugin->config['status_invalid'];
                     break;
                 case "não selecionado":
                 case "nao selecionado":
                 case "não selecionada":
                 case "nao selecionada":
-                    $result = "3";
+                    $result = $plugin->config['result_not_selected'];
+                    $obs_padrao = $plugin->config['obs_not_selected'];
+                    $status = $plugin->config['status_not_selected'];
                     break;
                 case "suplente":
                     $result = "8";
@@ -363,6 +369,11 @@ class Controller extends \MapasCulturais\Controllers\Registration
                 default:
                     die("The value for column $key_eval at line $i is invalid. Allowed values are 'selecionada', 'invalida', 'nao selecionada', and 'suplente'.");
             }
+            
+            if (empty($obs)) {
+                $obs = $obs_padrao;
+            }
+
             if(!$registration = $app->repo("Registration")->findOneBy(["number" => $num])){
                 continue;
             }
@@ -375,7 +386,13 @@ class Controller extends \MapasCulturais\Controllers\Registration
             $app->log->info("$name #{$count} {$registration} $eval");
             $registration->{$slug . "_raw"} = $line;
             $registration->{$slug . "_filename"} = $filename;
+
+            if($this->config['enabled_alter_status_on_import']){
+                $registration->_setStatusTo($status);
+            }
             $registration->save(true);
+
+
             $user = $plugin->user;
             /* @TODO: versão para avaliação documental */
             $evaluation = new RegistrationEvaluation;

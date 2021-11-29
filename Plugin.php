@@ -4,9 +4,12 @@ namespace GenericValidator;
 
 use MapasCulturais\i;
 use MapasCulturais\App;
+use AbstractValidator\AbstractValidator;
 use MapasCulturais\Entities\Registration;
 
-class Plugin extends \AbstractValidator\AbstractValidator
+require_once __DIR__ . "/../AbstractValidator/AbstractValidator.php";
+
+class Plugin extends AbstractValidator
 {
     protected static $instance = null;
 
@@ -30,21 +33,40 @@ class Plugin extends \AbstractValidator\AbstractValidator
             // lista de validadores requeridos na exportação
             "required_validations_for_export" => [],
             // campos do exportador
-            "export_fields" => [
-                i::__("NOME") => function($registration){
-                    return $registration->field_3949;
-                },
-                i::__("CPF") => function($registration){
+            "export_fields" => [],
 
-                    $cpf = preg_replace('/[^0-9]/i', '', $registration->field_3953);
+            // Configuração das manipulções dos status
+            "enabled_alter_status_on_import" => false,
 
-                    $docFormat = substr($cpf, 0, 3) . '.' .
-                                 substr($cpf, 3, 3) . '.' .
-                                 substr($cpf, 6, 3) . '-' .
-                                 substr($cpf, 9, 2);
-                    return $docFormat;
-                },
-            ],
+            // Valores para a inscrição homologada
+            'result_homologated' => i::__('Homologada'),
+            'obs_homologated' => i::__('Inscrição homologada'),
+            'status_homologated' => Registration::STATUS_SENT,
+
+            // Valores para a inscrição Em análise
+            'result_analysis' => i::__('Inscrição em análise'),
+            'obs_analysis' => i::__('Inscrição em análise'),
+            'status_analysis' => Registration::STATUS_SENT,
+
+            // Valores para a inscrição Selecionada
+            'result_selected' => i::__('Selecionada'),
+            'obs_selected' => i::__('Inscrição selecionada'),
+            'status_selected' => Registration::STATUS_APPROVED,
+
+            // Valores para a inscrição inválida
+            'result_invalid' => i::__('Inválida'),
+            'obs_invalid' => i::__('Inscrição inválida'),
+            'status_invalid' => Registration::STATUS_INVALID,
+
+            // Valores para a inscrição Não selecionada
+            'result_not_selected' => i::__('Não selecionada'),
+            'obs_not_selected' => i::__('Inscrição não selecionada'),
+            'status_not_selected' => Registration::STATUS_NOTAPPROVED,
+
+            // Valores para a inscrição suplente
+            'result_substitute' => i::__('Suplente'),
+            'obs_substitute' => i::__('Recurso: inscrição suplente'),
+            'status_substitute' => Registration::STATUS_WAITLIST
         ];
         $this->_config = $config;
         parent::__construct($config);
